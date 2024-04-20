@@ -117,21 +117,33 @@ public class theaterGui extends ticket {
     }
 
 
-    /**
-     * Returns the ticket back per the specific theater selected 
-     * @param theaterNumber
-     */
-    public void returnTicket(int theaterNumber) {
-        if (theaterNumber == 1) {
-            ticketCounterTheater1++;
-            JOptionPane.showMessageDialog(null, "Ticket returned successfully for for Kung Fu Panda 4 at 1:00 PM!");
-        } else if (theaterNumber == 2) {
-            ticketCounterTheater2++;
-            JOptionPane.showMessageDialog(null, "Ticket returned successfully for Kung Fu Panda 4 at 8:00 PM!");
-        } else {
-            JOptionPane.showMessageDialog(null, "Invalid theater number.");
-        }
+ /**
+ * Returns a ticket for the specified theater and seat number.
+ * Increments the ticket counter and adjusts the current seat number.
+ * @param theaterNumber The specific theater from which to return the ticket.
+ * @param seatNumber The seat number being returned.
+ * @throws IllegalArgumentException If the theater number or seat number is invalid.
+ */
+public void returnTicket(int theaterNumber, int seatNumber) {
+    if (theaterNumber != 1 && theaterNumber != 2) {
+        throw new IllegalArgumentException("Invalid theater number.");
     }
+
+    if (theaterNumber == 1) {
+        // Increment the ticket counter for theater 1
+        ticketCounterTheater1++;
+        // Decrement the current seat number for theater 1
+        currentSeatNumberTheater1--;
+        JOptionPane.showMessageDialog(null, "Ticket returned successfully for Kung Fu Panda 4 at 1:00 PM! Seat Number: " + seatNumber);
+    } else if (theaterNumber == 2) {
+        // Increment the ticket counter for theater 2
+        ticketCounterTheater2++;
+        // Decrement the current seat number for theater 2
+        currentSeatNumberTheater2--;
+        JOptionPane.showMessageDialog(null, "Ticket returned successfully for Kung Fu Panda 4 at 8:00 PM! Seat Number: " + seatNumber);
+    }
+}
+
 
 
 
@@ -153,45 +165,72 @@ public class theaterGui extends ticket {
         theater = new theaterGui(0, 1, LocalDate.now(), 0); // Initializing with dummy values
     
         boolean continuePicking = true;
-        while (continuePicking) { 
-            theaterNumber = Integer.parseInt(JOptionPane.showInputDialog("Enter theater number (1) for Kung Fu Panda 4 at 1:00PM" + "\n" + " or (2) for Kung Fu Panda 4 at 8:00PM:"));
+        while (continuePicking) {
+            // Prompt the user for their choice
+            String choice = JOptionPane.showInputDialog("Enter (1) to buy a ticket or (2) to return a ticket:");
+            
+            if (choice.equals("1")) {
+                // User wants to buy a ticket
+                theaterNumber = Integer.parseInt(JOptionPane.showInputDialog("Enter theater number (1) for Kung Fu Panda 4 at 1:00PM" + "\n" + " or (2) for Kung Fu Panda 4 at 8:00PM:"));
     
-            // Set date and time based on theater number
-            if (theaterNumber == 1) {
-                date = LocalDate.of(2024, 4, 20); // April 20, 2024
-                time = 1300; // 1:00 PM
-            } else if (theaterNumber == 2) {
-                date = LocalDate.of(2024, 4, 28); // April 28, 2024
-                time = 2000; // 8:00 PM
-            } else {
-                JOptionPane.showMessageDialog(null, "Invalid theater number.");
-                return; // Exit the program if theater number is invalid
-            }
-    
-            LocalTime localTime = LocalTime.of(time / 100, time % 100);
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mm a");
-            String formattedTime = localTime.format(formatter);
-    
-            // Update the theaterGui object with new date and time
-            theater.setDate(date);
-            theater.setTime(time);
-            theater.theaterNumber = theaterNumber;
-    
-            try {
-                theater.artistTheaterFull(theaterNumber);
-                int numOfSeats = 1; // Number of seats to buy
-                int seatNumber = theater.getNextSeatNumber(theaterNumber, numOfSeats); // Get next available seat number    
-                theater.buyTicket(theaterNumber, seatNumber); // Buy ticket with the obtained seat number
-                int option = JOptionPane.showConfirmDialog(null, "Do you want to buy more tickets?", "Continue", JOptionPane.YES_NO_OPTION);
-                if (option == JOptionPane.NO_OPTION) {
-                    continuePicking = false;
+                // Set date and time based on theater number
+                if (theaterNumber == 1) {
+                    date = LocalDate.of(2024, 4, 20); // April 20, 2024
+                    time = 1300; // 1:00 PM
+                } else if (theaterNumber == 2) {
+                    date = LocalDate.of(2024, 4, 28); // April 28, 2024
+                    time = 2000; // 8:00 PM
+                } else {
+                    JOptionPane.showMessageDialog(null, "Invalid theater number.");
+                    continue; // Go back to the loop if theater number is invalid
                 }
-            } catch (NoSeatAvailableException e) {
-                JOptionPane.showMessageDialog(null, e.getMessage());
-                continuePicking = false; // Exit loop if no more seats available
+    
+                LocalTime localTime = LocalTime.of(time / 100, time % 100);
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mm a");
+                String formattedTime = localTime.format(formatter);
+    
+                // Update the theaterGui object with new date and time
+                theater.setDate(date);
+                theater.setTime(time);
+                theater.theaterNumber = theaterNumber;
+    
+                try {
+                    theater.artistTheaterFull(theaterNumber);
+                    int numOfSeats = 1; // Number of seats to buy
+                    int seatNumber = theater.getNextSeatNumber(theaterNumber, numOfSeats); // Get next available seat number    
+                    theater.buyTicket(theaterNumber, seatNumber); // Buy ticket with the obtained seat number
+                    int option = JOptionPane.showConfirmDialog(null, "Do you want to buy more tickets?", "Continue", JOptionPane.YES_NO_OPTION);
+                    if (option == JOptionPane.NO_OPTION) {
+                        continuePicking = false;
+                    }
+                } catch (NoSeatAvailableException e) {
+                    JOptionPane.showMessageDialog(null, e.getMessage());
+                    continuePicking = false; // Exit loop if no more seats available
+                }
+            } else if (choice.equals("2")) {
+                // User wants to return a ticket
+                try {
+                    // Prompt the user for the theater number
+                    theaterNumber = Integer.parseInt(JOptionPane.showInputDialog("Enter theater number (1 or 2) to return the ticket:"));
+    
+                    // Prompt the user for the seat number
+                    int seatNumber = Integer.parseInt(JOptionPane.showInputDialog("Enter seat number to return:"));
+    
+                    // Call the returnTicket method with the specified theater number and seat number
+                    theater.returnTicket(theaterNumber, seatNumber);
+    
+                    // Display a confirmation message
+                    JOptionPane.showMessageDialog(null, "Ticket returned successfully.");
+                } catch (IllegalArgumentException e) {
+                    JOptionPane.showMessageDialog(null, "Invalid theater number or seat number.");
+                }
+            } else {
+                // Invalid choice
+                JOptionPane.showMessageDialog(null, "Invalid choice. Please choose (1) to buy a ticket or (2) to return a ticket.");
             }
         }
     }
+    
     
     private void setDate(LocalDate date) {
         this.date = date; // Update the date field
