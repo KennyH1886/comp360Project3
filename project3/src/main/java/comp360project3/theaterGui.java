@@ -13,7 +13,7 @@ public class theaterGui extends ticket {
     private int currentSeatNumberTheater2 = 1; // Initialize seat number for theater 2r
     LocalDate date;
     int time;
-
+    private int theaterNumber;
 
 
     public theaterGui(int time, int numOfSeats, LocalDate date, int theaterNumber) {
